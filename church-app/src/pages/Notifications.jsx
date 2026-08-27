@@ -1,0 +1,6 @@
+import { useEffect, useState } from "react";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase";
+import { useAuth } from "../context/AuthContext";
+import { BellIcon, UsersPlusIcon } from "../components/Icons";
+export default function Notifications(){const {currentUser}=useAuth();const [items,setItems]=useState([]);useEffect(()=>onSnapshot(query(collection(db,"friendRequests"),where("toId","==",currentUser.uid)),s=>setItems(s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)))),[currentUser.uid]);return <div className="page social-page"><div className="social-heading compact"><div><span className="eyebrow">Stay updated</span><h1>Notifications</h1></div><div className="heading-icon"><BellIcon/></div></div><section className="panel notification-list">{items.length?items.map(r=><div className="notification" key={r.id}><span className="notification-icon"><UsersPlusIcon/></span><div><strong>{r.fromName}</strong> sent you a friend request.<p>{r.createdAt?.toDate? r.createdAt.toDate().toLocaleString():"Just now"}</p></div><span className={`status-dot ${r.status}`}></span></div>):<div className="empty-state"><BellIcon/><h3>You're all caught up</h3><p>New activity will appear here.</p></div>}</section></div>}
